@@ -22,6 +22,7 @@ public class BinderHookHandler implements InvocationHandler {
 
     public BinderHookHandler(IBinder base, Class<?> stubClass) {
         try {
+            //替换存根的传参对象
             Method asInterfaceMethod = stubClass.getDeclaredMethod("asInterface", IBinder.class);
             // IClipboard.Stub.asInterface(base);
             this.base = asInterfaceMethod.invoke(null, base);
@@ -34,6 +35,7 @@ public class BinderHookHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
+        Log.e("TAG", "BinderHookHandler invoke---------------------------:");
         // 把剪切版的内容替换为 "you are hooked"
         if ("getPrimaryClip".equals(method.getName())) {
             Log.d(TAG, "hook getPrimaryClip");
