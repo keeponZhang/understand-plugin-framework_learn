@@ -39,9 +39,13 @@ public class BinderProxyHookHandler implements InvocationHandler {
     Class<?> iinterface;
 
     public BinderProxyHookHandler(IBinder base) {
+        //这个是
         this.base = base;
         try {
+            //实例化一个本地存根
             this.stub = Class.forName("android.content.IClipboard$Stub");
+            //aidl接口
+            //IClipboard会继承iinterface接口，iinterface里面有一个asBinder方法
             this.iinterface = Class.forName("android.content.IClipboard");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -51,9 +55,16 @@ public class BinderProxyHookHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
+        //其实就是proxy就是base
+        //这里hook的是一个IBinder对象,其实也是BinderProxy
         if ("queryLocalInterface".equals(method.getName())) {
-
-            Log.d(TAG, "hook queryLocalInterface");
+            //第一次使用剪贴板功能的时候回
+            Log.e(TAG, "hook queryLocalInterface args.lenght="+args.length+" base="+base);
+            if(args.length>0){
+                for (Object arg : args) {
+                    Log.e("TAG", "BinderProxyHookHandler invoke arg:"+arg+"  proxy="+proxy);
+                }
+            }
 
             // 这里直接返回真正被Hook掉的Service接口
             // 这里的 queryLocalInterface 就不是原本的意思了
