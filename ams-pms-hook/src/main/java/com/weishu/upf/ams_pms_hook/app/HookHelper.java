@@ -28,7 +28,7 @@ public final class HookHelper {
             Field mInstanceField = singleton.getDeclaredField("mInstance");
             mInstanceField.setAccessible(true);
 
-            // ActivityManagerNative 的gDefault对象里面原始的 IActivityManager对象
+            // ActivityManagerNative 的gDefault对象里面原始的 IActivityManager对象，其实是个代理对象ActivityManagerProxy
             Object rawIActivityManager = mInstanceField.get(gDefault);
 
             // 创建一个这个对象的代理对象, 然后替换这个字段, 让我们的代理对象帮忙干活

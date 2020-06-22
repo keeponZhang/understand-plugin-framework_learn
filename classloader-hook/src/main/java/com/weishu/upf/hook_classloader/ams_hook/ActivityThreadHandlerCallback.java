@@ -65,11 +65,15 @@ import android.os.Message;
             activityInfoField.setAccessible(true);
 
             // 根据 getPackageInfo 根据这个 包名获取 LoadedApk的信息; 因此这里我们需要手动填上, 从而能够命中缓存
+            //aInfo:ApplicationInfo:
+            //ref = mPackages.get(aInfo.packageName); 1814
+            //2296 从mPackages集合拿值里面key是这里传进去的
             ActivityInfo activityInfo = (ActivityInfo) activityInfoField.get(obj);
 
             activityInfo.applicationInfo.packageName = target.getPackage() == null ?
                     target.getComponent().getPackageName() : target.getPackage();
 
+            //解决IPackageManager.getPackageInfo返回空问题
             hookPackageManager();
         } catch (Exception e) {
             throw new RuntimeException("hook launch activity failed", e);
