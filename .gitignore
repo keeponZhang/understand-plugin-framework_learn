@@ -32,3 +32,12 @@ proguard/
 
 # Android Studio captures folder
 captures/
+service-management/service-management.iml
+receiver-management/receiver-management.iml
+contentprovider-management/contentprovider-management.iml
+binder-hook/binder-hook.iml
+ams-pms-hook/ams-pms-hook.iml
+understand-plugin-framework.iml
+intercept-activity/intercept-activity.iml
+dynamic-proxy-hook/dynamic-proxy-hook.iml
+classloader-hook/classloader-hook.iml
