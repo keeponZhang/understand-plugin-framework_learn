@@ -29,7 +29,7 @@ public class BinderHookHelper {
         // Hook 掉这个Binder代理对象的 queryLocalInterface 方法
         // 然后在 queryLocalInterface 返回一个IInterface对象, hook掉我们感兴趣的方法即可.
         IBinder hookedBinder = (IBinder) Proxy.newProxyInstance(serviceManager.getClassLoader(),
-                new Class<?>[] { IBinder.class },
+                new Class<?>[]{IBinder.class},
                 new BinderProxyHookHandler(rawBinder));
 
         // 把这个hook过的Binder代理对象放进ServiceManager的cache里面
@@ -39,5 +39,7 @@ public class BinderHookHelper {
         Map<String, IBinder> cache = (Map) cacheField.get(null);
         cache.put(CLIPBOARD_SERVICE, hookedBinder);
     }
-
 }
+
+// }IBinder b = ServiceManager.getService("service_name"); // 获取原始的IBinder对象
+//     IXXInterface in = IXXInterface.Stub.asInterface(b); // 转换为Service接口

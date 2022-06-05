@@ -39,7 +39,7 @@ public class BinderProxyHookHandler implements InvocationHandler {
     Class<?> iinterface;
 
     public BinderProxyHookHandler(IBinder base) {
-        //这个是
+        // 原始的Service对象 (IInterface)，也就是那个BinderProxy
         this.base = base;
         try {
             //实例化一个本地存根
@@ -54,15 +54,31 @@ public class BinderProxyHookHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-
-        //其实就是proxy就是base
+        // Log.d(TAG,Log.getStackTraceString(new Throwable()));
+        //其实就是proxy就是base,
         //这里hook的是一个IBinder对象,其实也是BinderProxy
+        // if(proxy!=null){
+        //     Log.e("TAG", "BinderProxyHookHandler invoke proxy:"+proxy+"  base="+base );
+        //
+        // }else{
+        //     Log.e("TAG", "BinderProxyHookHandler invoke proxy == null:" );
+        // }
+        //IBinder b = ServiceManager.getService("service_name"); // 获取原始的IBinder对象
+        // IXXInterface in = IXXInterface.Stub.asInterface(b); // 转换为Service接口
+        //这里是因为存根对象调用了asInterface方法，传入proxy，然后proxy调用queryLocalInterface方法，就走到了这里
         if ("queryLocalInterface".equals(method.getName())) {
             //第一次使用剪贴板功能的时候回
-            Log.e(TAG, "hook queryLocalInterface args.lenght="+args.length+" base="+base);
             if(args.length>0){
                 for (Object arg : args) {
-                    Log.e("TAG", "BinderProxyHookHandler invoke arg:"+arg+"  proxy="+proxy);
+                    Log.e("TAG", "BinderProxyHookHandler invoke arg:"+arg+"  proxy="+(proxy==null));
+                }
+            }
+            if(args!=null&&args.length>0){
+                Object invoke = method.invoke(base,args);
+                Log.e("TAG",
+                        "BinderProxyHookHandler invoke 真正返回的invoke==null:"+(invoke==null)+"  method="+method );
+                if(true){
+                    return invoke;
                 }
             }
 
@@ -72,7 +88,8 @@ public class BinderProxyHookHandler implements InvocationHandler {
             // 因此必须是一个完整的 asInterface 过的 IInterface对象, 既要处理本地对象,也要处理代理对象
             // 这只是一个Hook点而已, 它原始的含义已经被我们重定义了; 因为我们会永远确保这个方法不返回null
             // 让 IClipboard.Stub.asInterface 永远走到if语句的else分支里面
-            return Proxy.newProxyInstance(proxy.getClass().getClassLoader(),
+            //这个是伪装的剪贴板服务对象，之后调用剪贴板都会走入到这里面去
+            Object o = Proxy.newProxyInstance(proxy.getClass().getClassLoader(),
 
                     // asInterface 的时候会检测是否是特定类型的接口然后进行强制转换
                     // 因此这里的动态代理生成的类型信息的类型必须是正确的
@@ -84,8 +101,11 @@ public class BinderProxyHookHandler implements InvocationHandler {
                     // 所以, 其实返回的对象不需要是Binder对象, 我们把它当作普通的对象Hook掉就ok(拦截这个对象里面对于IXXInterface相关方法的调用)
                     // tks  jeremyhe_cn@qq.com
                     //调用
-                    new Class[] { this.iinterface },
+                    new Class[]{this.iinterface},
                     new BinderHookHandler(base, stub));
+            Log.e(TAG, "invoke 返回 o:"+o);
+            //这里返回的是一个stub$proxy对象，stub$proxy其实就是实现了iinterface接口，持有bindproxy对象
+            return o;
         }
 
         Log.d(TAG, "method:" + method.getName());
